@@ -46,11 +46,11 @@ public class Climber extends SubsystemBase {
     }
 
     public Command climb() {
-        return run(() -> setClimb(true));
+        return runOnce(() -> setClimb(true));
     }
 
     public Command decline() {
-        return run(() -> setClimb(false));
+        return runOnce(() -> setClimb(false));
     }
 
     public Command calibrate() {

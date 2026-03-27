@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -45,13 +44,15 @@ public class RobotContainer {
         public final Intake intake = new Intake();
         public final Shooter shooter = new Shooter();
         public final Climber climber = new Climber();
+        public final SendableChooser<Command> autoChooser;
 
         public RobotContainer() {
-                // NamedCommands.registerCommand("Shoot", shooter.shoot().withTimeout(8));
-                // NamedCommands.registerCommand("Climb", climber.climb());
-                // autoChooser = AutoBuilder.buildAutoChooser();
-                // autoChooser.addOption("Shoot + Climb", Autos.ShootClimbAuto());
-                // SmartDashboard.putData("Auto Mode", autoChooser);
+                NamedCommands.registerCommand("Shoot", shooter.shoot().withTimeout(8));
+                NamedCommands.registerCommand("Climb", climber.climb());
+
+                autoChooser = AutoBuilder.buildAutoChooser(Autos.DEFAULT_AUTO_NAME);
+                SmartDashboard.putData("Auto Mode", autoChooser);
+
                 configureBindings();
         }
 
@@ -111,18 +112,6 @@ public class RobotContainer {
         }
 
         public Command getAutonomousCommand() {
-                // Simple drive forward auton
-                final var idle = new SwerveRequest.Idle();
-                return Commands.sequence(
-                // Reset our field centric heading to match the robot
-                // facing away from our alliance station wall (0 deg).
-                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-                // Then slowly drive forward (away from us) for 5 seconds.
-                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
-                .withVelocityY(0)
-                .withRotationalRate(0))
-                .withTimeout(5.0),
-                // Finally idle for the rest of auton
-                drivetrain.applyRequest(() -> idle));
+                return autoChooser.getSelected();
         }
 }
