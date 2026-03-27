@@ -69,7 +69,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    private final PoseEstimator poseEstimator; 
     /*
      * SysId routine for characterizing translation. This is used to find PID gains
      * for the drive motors.
@@ -150,45 +149,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
-        poseEstimator = new PoseEstimator<>(getKinematics(), new Rotation2d(), getModulePositions, new Pose2d())
-        RobotConfig config;
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        AutoBuilder.configure(
-                this::getPose,
-                this::resetPose,
-                this::getRobotRelativeSpeeds,
-                (speeds, feedforwards) -> driveRobotRelative(speeds),
-                new PPHolonomicDriveController(
-                        new PIDConstants(5, 0, 0),
-                        new PIDConstants(5, 0, 0)),
-                config,
-                () -> {
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this);
     }
-
-    public Pose2d getPose() { 
-        return poseEstimator.getEstimatedPosition(); 
-    }
-
-    public Rotation2d getRobotRelativSpeeds() {
-        
-    }
-
-    public SwerveModulePosition[] getModulePositions() {
-        return SwerveModulePosition[4]{TunerConstants.FrontLeft, TunerConstants.FrontRight, TunerConstants.BackLeft TunerConstants.BackRight}; 
-    } 
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
